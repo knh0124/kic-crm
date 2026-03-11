@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIC M&A CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c10;--surface:#111318;--surface2:#181c24;
+  --border:#1e2330;--border2:#2a3045;
+  --accent:#3b82f6;--accent2:#6366f1;
+  --green:#10b981;--amber:#f59e0b;--red:#ef4444;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#4a5568;
+  --mono:'DM Mono',monospace;--sans:'Noto Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:13px;}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:9px;}
+.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.logo-text{font-size:15px;font-weight:700;letter-spacing:-.3px;}
+.logo-sub{font-size:10px;color:var(--green);font-family:var(--mono);padding:2px 7px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);border-radius:4px;margin-left:6px;}
+.header-right{display:flex;align-items:center;gap:10px;}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:500;font-family:var(--sans);cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#2563eb;}
+.btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--border2);}.btn-secondary:hover{border-color:var(--accent);color:var(--text);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid transparent;}.btn-ghost:hover{background:var(--surface2);color:var(--text);}
+.btn-danger{background:transparent;color:var(--red);border:1px solid transparent;padding:5px 8px;}.btn-danger:hover{background:rgba(239,68,68,.1);}
+.btn-sm{padding:5px 10px;font-size:11.5px;}
+
+.tab-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;}
+.tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}.tab:hover{color:var(--text2);}.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+main{padding:20px 24px;}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.stat-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.stat-val{font-size:21px;font-weight:700;line-height:1;}
+.stat-label{font-size:11px;color:var(--text2);margin-top:3px;}
+
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+.toolbar-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.search-wrap{position:relative;}
+.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:12px;}
+.search-input{background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:7px 10px 7px 28px;color:var(--text);font-family:var(--sans);font-size:12.5px;width:220px;outline:none;}.search-input:focus{border-color:var(--accent);}
+.filter-select{background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text2);font-family:var(--sans);font-size:12.5px;outline:none;cursor:pointer;}.filter-select:focus{border-color:var(--accent);}
+
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:1200px;}
+thead tr{border-bottom:1px solid var(--border);background:var(--surface2);}
+th{padding:10px 12px;text-align:left;font-size:10.5px;font-weight:600;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;font-family:var(--mono);}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(59,130,246,.04);}
+td{padding:11px 12px;vertical-align:middle;}
+
+.company-cell{display:flex;align-items:center;gap:9px;}
+.company-avatar{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:#fff;}
+.company-name{font-weight:600;font-size:13px;}
+.company-type{font-size:10.5px;color:var(--text3);margin-top:1px;font-family:var(--mono);}
+
+.tag-list{display:flex;flex-wrap:wrap;gap:3px;}
+.tag{padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap;}
+.tag-blue{background:rgba(59,130,246,.15);color:#93c5fd;}
+.tag-purple{background:rgba(99,102,241,.15);color:#a5b4fc;}
+.tag-green{background:rgba(16,185,129,.15);color:#6ee7b7;}
+.tag-amber{background:rgba(245,158,11,.15);color:#fcd34d;}
+.tag-red{background:rgba(239,68,68,.15);color:#fca5a5;}
+.tag-teal{background:rgba(20,184,166,.15);color:#5eead4;}
+.tag-rose{background:rgba(244,63,94,.15);color:#fda4af;}
+.tag-cyan{background:rgba(6,182,212,.15);color:#67e8f9;}
+
+.person-stack{display:flex;flex-direction:column;gap:4px;}
+.person-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:var(--surface2);border:1px solid var(--border2);border-radius:20px;font-size:11.5px;width:fit-content;}
+.person-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.pd-i{background:var(--accent);}
+.pd-c{background:#a5b4fc;}
+.person-email-tiny{font-size:10px;color:var(--text3);font-family:var(--mono);padding-left:13px;}
+
+.memo-cell{font-size:11.5px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.memo-empty{color:var(--text3);font-style:italic;}
+
+.date-badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10.5px;padding:3px 7px;background:var(--surface2);border-radius:5px;white-space:nowrap;}
+.fresh{color:var(--green);background:rgba(16,185,129,.1);}
+.recent{color:var(--amber);background:rgba(245,158,11,.1);}
+.old{color:var(--text3);}
+
+.actions{display:flex;gap:3px;}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;align-items:center;justify-content:center;padding:20px;}.overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:660px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.modal-sm{max-width:480px;}
+.modal-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:15px;font-weight:700;}
+.modal-body{padding:18px 22px;}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:11px;color:var(--text2);font-weight:500;}
+input[type="text"],input[type="email"],input[type="date"],textarea,select.form-select{background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--text);font-family:var(--sans);font-size:12.5px;outline:none;width:100%;}
+input:focus,textarea:focus,select.form-select:focus{border-color:var(--accent);}
+textarea{resize:vertical;min-height:68px;}
+
+.tag-input-wrap{display:flex;flex-wrap:wrap;gap:4px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:5px 7px;min-height:34px;cursor:text;}.tag-input-wrap:focus-within{border-color:var(--accent);}
+.tag-input-wrap input{background:none;border:none;outline:none;color:var(--text);font-size:12.5px;min-width:80px;flex:1;padding:0;}
+.ti-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.3);border-radius:4px;font-size:11px;color:#93c5fd;}
+.ti-remove{cursor:pointer;opacity:.6;font-size:11px;}.ti-remove:hover{opacity:1;}
+
+.section-label{font-size:11.5px;font-weight:600;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+.person-list{display:flex;flex-direction:column;gap:5px;}
+.person-item{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;}
+.person-item-info{flex:1;}
+.person-item-name{font-size:12.5px;font-weight:600;}
+.person-item-email{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:1px;}
+
+.people-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.people-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:9px;}
+.people-card-top{display:flex;align-items:center;gap:10px;}
+.people-avatar{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}
+.people-name{font-size:14px;font-weight:700;}
+.people-title-text{font-size:11.5px;color:var(--text3);margin-top:2px;}
+.pt-badge{font-size:10.5px;padding:2px 7px;border-radius:4px;font-weight:500;display:inline-block;margin-top:3px;}
+.pt-i{background:rgba(16,185,129,.15);color:#6ee7b7;}
+.pt-c{background:rgba(99,102,241,.15);color:#a5b4fc;}
+.email-link{font-size:11.5px;color:var(--accent);font-family:var(--mono);text-decoration:none;}.email-link:hover{text-decoration:underline;}
+.email-btn{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;padding:3px 8px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:4px;color:#93c5fd;text-decoration:none;cursor:pointer;}.email-btn:hover{background:rgba(59,130,246,.2);}
+
+.detail-overlay{display:none;position:fixed;inset:0;z-index:150;pointer-events:none;}.detail-overlay.show{display:block;pointer-events:auto;}
+.detail-bg{position:absolute;inset:0;background:rgba(0,0,0,.4);}
+.detail-panel{position:absolute;right:0;top:0;bottom:0;width:460px;background:var(--surface);border-left:1px solid var(--border2);overflow-y:auto;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);}.detail-overlay.show .detail-panel{transform:translateX(0);}
+.detail-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);}
+.detail-avatar{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;}
+.detail-body{padding:16px 20px;flex:1;}
+.detail-section{margin-bottom:16px;}
+.detail-section-title{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);font-family:var(--mono);margin-bottom:7px;font-weight:600;}
+.detail-person-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border-radius:7px;margin-bottom:5px;}
+.detail-person-info{flex:1;}
+.detail-person-name{font-size:12.5px;font-weight:600;}
+.detail-person-email{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.detail-note{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.65;}
+.note-date{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:4px;}
+.detail-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:7px;}
+.divider{height:1px;background:var(--border);margin:12px 0;}
+
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-row td,.empty-row td{text-align:center;padding:44px;color:var(--text3);}
+
+.sync-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px;}
+.s-ok{background:var(--green);}
+.s-saving{background:var(--amber);animation:pulse 1s infinite;}
+.s-err{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+.notify-toast{position:fixed;bottom:22px;right:22px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;max-width:320px;z-index:999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}.notify-toast.show{opacity:1;transform:translateY(0);}
+.notify-toast.success{border-color:rgba(16,185,129,.35);}.notify-toast.error{border-color:rgba(239,68,68,.35);}
+.toast-header{font-weight:600;font-size:12.5px;margin-bottom:3px;}
+.toast-body{font-size:11.5px;color:var(--text2);}
+
+.close-btn{background:none;border:none;color:var(--text3);font-size:17px;cursor:pointer;padding:4px;line-height:1;border-radius:5px;}.close-btn:hover{color:var(--text);background:var(--surface2);}
+.page-section{display:none;}.page-section.active{display:block;}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📊</div>
+    <span class="logo-text">KIC M&A CRM</span>
+    <span class="logo-sub" id="syncBadge">● 연결 중...</span>
+  </div>
+  <div class="header-right">
+    <span id="syncStatus" style="font-size:11px;color:var(--text3);display:flex;align-items:center"></span>
+    <button class="btn btn-secondary btn-sm" onclick="loadAll()">🔄 새로고침</button>
+    <button class="btn btn-secondary btn-sm" onclick="exportCSV()">⬇ CSV</button>
+    <button class="btn btn-primary" id="headerAddBtn" onclick="openAddModal()">+ 기업 추가</button>
+  </div>
+</header>
+
+<div class="tab-bar">
+  <div class="tab active" id="tab-crm" onclick="switchTab('crm')">🏢 기업 CRM</div>
+  <div class="tab" id="tab-people" onclick="switchTab('people')">👥 담당자 관리</div>
+</div>
+
+<!-- CRM TAB -->
+<div class="page-section active" id="page-crm">
+<main>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-icon" style="background:rgba(59,130,246,.15)">🏢</div><div><div class="stat-val" id="statTotal">0</div><div class="stat-label">등록 기업</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:rgba(16,185,129,.15)">🤝</div><div><div class="stat-val" id="statActive">0</div><div class="stat-label">활성 딜</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:rgba(245,158,11,.15)">🌏</div><div><div class="stat-val" id="statRegions">0</div><div class="stat-label">관심 지역 수</div></div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:rgba(99,102,241,.15)">📅</div><div><div class="stat-val" id="statRecent">0</div><div class="stat-label">이번 달 업데이트</div></div></div>
+  </div>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="기업명, 담당자, 메모 검색..." oninput="renderTable()">
+      </div>
+      <select class="filter-select" id="filterRegion" onchange="renderTable()">
+        <option value="">전체 지역</option>
+        <option>북미</option><option>유럽</option><option>동남아</option><option>일본</option><option>중국</option><option>중동</option><option>기타</option>
+      </select>
+      <select class="filter-select" id="filterPic" onchange="renderTable()"><option value="">전체 담당자</option></select>
+      <select class="filter-select" id="filterStatus" onchange="renderTable()">
+        <option value="">전체 상태</option><option value="active">활성</option><option value="watching">관망</option><option value="inactive">비활성</option>
+      </select>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>기업명</th><th>고객사 담당자</th><th>M&A 관심 사업</th><th>해외 관심 지역</th><th>우리회사 담당자</th><th>메모</th><th>최근 업데이트</th><th>관리</th>
+      </tr></thead>
+      <tbody id="tableBody"><tr class="loading-row"><td colspan="8"><span class="spinner"></span>데이터 불러오는 중...</td></tr></tbody>
+    </table>
+  </div>
+</main>
+</div>
+
+<!-- PEOPLE TAB -->
+<div class="page-section" id="page-people">
+<main>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="peopleSearch" placeholder="이름, 이메일 검색..." oninput="renderPeople()">
+      </div>
+      <select class="filter-select" id="peopleTypeFilter" onchange="renderPeople()">
+        <option value="">전체 유형</option>
+        <option value="internal">우리회사 담당자</option>
+        <option value="client">고객사 담당자</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="openPersonModal()">+ 담당자 추가</button>
+  </div>
+  <div class="people-grid" id="peopleGrid"><div style="color:var(--text3);padding:40px;text-align:center"><span class="spinner"></span>불러오는 중...</div></div>
+</main>
+</div>
+
+<!-- COMPANY MODAL -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">기업 추가</span>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>기업명 *</label><input type="text" id="fCompany" placeholder="예: 삼성전자"></div>
+        <div class="form-group"><label>기업 유형</label><select class="form-select" id="fType"><option>대기업</option><option>중견기업</option><option>외국계</option><option>공기업</option></select></div>
+        <div class="form-group full">
+          <div class="section-label">👤 고객사 담당자 <button class="btn btn-secondary btn-sm" onclick="openPersonModal('client')">+ 새 담당자</button></div>
+          <div id="clientPersonList" class="person-list"></div>
+          <select class="form-select" id="fClientPersonSelect" style="margin-top:6px" onchange="addPersonToRecord('client')"><option value="">— 담당자 선택 —</option></select>
+        </div>
+        <div class="form-group full">
+          <div class="section-label">🏠 우리회사 담당자 <button class="btn btn-secondary btn-sm" onclick="openPersonModal('internal')">+ 새 담당자</button></div>
+          <div id="internalPersonList" class="person-list"></div>
+          <select class="form-select" id="fInternalPersonSelect" style="margin-top:6px" onchange="addPersonToRecord('internal')"><option value="">— 담당자 선택 —</option></select>
+        </div>
+        <div class="form-group full"><label>M&A 관심 사업 (엔터/쉼표로 구분)</label>
+          <div class="tag-input-wrap" id="bizTagWrap" onclick="this.querySelector('input').focus()"><input type="text" id="bizTagInput" placeholder="사업명 입력 후 엔터..." onkeydown="handleTagInput(event,'biz')"></div>
+        </div>
+        <div class="form-group full"><label>해외 관심 지역 (엔터/쉼표로 구분)</label>
+          <div class="tag-input-wrap" id="regionTagWrap" onclick="this.querySelector('input').focus()"><input type="text" id="regionTagInput" placeholder="지역 입력 후 엔터..." onkeydown="handleTagInput(event,'region')"></div>
+        </div>
+        <div class="form-group full"><label>메모</label><input type="text" id="fMemo" placeholder="예: Q2 북미 AI 스타트업 인수 검토 중"></div>
+        <div class="form-group full"><label>업데이트 상세 내용</label><textarea id="fNote" placeholder="이번 업데이트 상세 내용..."></textarea></div>
+        <div class="form-group"><label>업데이트 날짜</label><input type="date" id="fDate"></div>
+        <div class="form-group"><label>상태</label><select class="form-select" id="fStatus"><option value="active">🟢 활성</option><option value="watching">🟡 관망</option><option value="inactive">⚫ 비활성</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveRecord()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- PERSON MODAL -->
+<div class="overlay" id="personModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title" id="personModalTitle">담당자 추가</span>
+      <button class="close-btn" onclick="closePersonModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>이름 *</label><input type="text" id="pName" placeholder="예: 김철수"></div>
+        <div class="form-group"><label>직함/직책</label><input type="text" id="pTitle" placeholder="예: 전무, 팀장"></div>
+        <div class="form-group full"><label>이메일</label><input type="email" id="pEmail" placeholder="example@company.com"></div>
+        <div class="form-group"><label>유형</label><select class="form-select" id="pType"><option value="internal">🏠 우리회사</option><option value="client">🏢 고객사</option></select></div>
+        <div class="form-group"><label>전화번호</label><input type="text" id="pPhone" placeholder="010-0000-0000"></div>
+        <div class="form-group full"><label>메모</label><input type="text" id="pNote" placeholder="담당자 메모"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closePersonModal()">취소</button>
+      <button class="btn btn-primary" id="personSaveBtn" onclick="savePerson()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-bg" onclick="closeDetail()"></div>
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<!-- TOAST -->
+<div class="notify-toast" id="toast">
+  <div class="toast-header" id="toastHeader"></div>
+  <div class="toast-body" id="toastBody"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// 설정
+// ═══════════════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/AKfycbyMD8yQGXErZY5d2P4NPCFn-PLXO2gUVg61W9JfeyFlLOBwABu991Ib5ruTZAUA42sU/exec';
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let records=[], people=[];
+let editingId=null, editingPersonId=null;
+let bizTags=[], regionTags=[];
+let formClientIds=[], formInternalIds=[];
+let personModalCallback=null;
+
+const AC=['#3b82f6','#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f43f5e','#84cc16','#f97316'];
+function getColor(s){let h=0;for(let c of(s||'?'))h=(h*31+c.charCodeAt(0))%AC.length;return AC[h];}
+const TC=['tag-blue','tag-purple','tag-green','tag-amber','tag-red','tag-teal','tag-rose','tag-cyan'];
+function tagColor(s){let h=0;for(let c of(s||''))h=(h*31+c.charCodeAt(0))%TC.length;return TC[h];}
+
+// ═══════════════════════════════════════════════
+// API 호출
+// ═══════════════════════════════════════════════
+async function apiGet(sheet) {
+  const res = await fetch(`${API_URL}?action=getAll&sheet=${sheet}`);
+  return await res.json();
+}
+
+async function apiPost(body) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(body)
+  });
+  return await res.json();
+}
+
+// ═══════════════════════════════════════════════
+// 데이터 로드
+// ═══════════════════════════════════════════════
+async function loadAll() {
+  setSync('loading');
+  try {
+    const [rData, pData] = await Promise.all([
+      apiGet('Companies'),
+      apiGet('People')
+    ]);
+    records = rData.map(r => ({
+      id: r.ID,
+      company: r.Title || '',
+      type: r.CompanyType || '대기업',
+      clientPersonIds: r.ClientPersonIds ? r.ClientPersonIds.split('|').filter(Boolean) : [],
+      internalPersonIds: r.InternalPersonIds ? r.InternalPersonIds.split('|').filter(Boolean) : [],
+      biz: r.BizAreas ? r.BizAreas.split('|').filter(Boolean) : [],
+      regions: r.Regions ? r.Regions.split('|').filter(Boolean) : [],
+      memo: r.Memo || '',
+      note: r.NoteDetail || '',
+      date: r.UpdateDate || '',
+      status: r.Status || 'active'
+    }));
+    people = pData.map(p => ({
+      id: p.ID,
+      name: p.Name || '',
+      title: p.PersonTitle || '',
+      email: p.Email || '',
+      type: p.PersonType || 'internal',
+      phone: p.Phone || '',
+      note: p.PersonNote || ''
+    }));
+    setBadge(true);
+    setSync('ok');
+    renderTable();
+    if(document.getElementById('page-people').classList.contains('active')) renderPeople();
+  } catch(e) {
+    setBadge(false);
+    setSync('err');
+    showToast('error', '⚠ 연결 실패', e.message);
+  }
+}
+
+function setBadge(ok) {
+  const b = document.getElementById('syncBadge');
+  b.textContent = ok ? '● Google Sheets 연동' : '● 연결 실패';
+  b.style.color = ok ? 'var(--green)' : 'var(--red)';
+}
+
+function setSync(s) {
+  const el = document.getElementById('syncStatus');
+  if(s==='loading') el.innerHTML='<span class="sync-dot s-saving"></span>불러오는 중...';
+  else if(s==='saving') el.innerHTML='<span class="sync-dot s-saving"></span>저장 중...';
+  else if(s==='ok') el.innerHTML='<span class="sync-dot s-ok"></span>동기화됨';
+  else el.innerHTML='<span class="sync-dot s-err"></span>오류';
+}
+
+// ═══════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('page-'+tab).classList.add('active');
+  if(tab==='crm'){document.getElementById('headerAddBtn').textContent='+ 기업 추가';document.getElementById('headerAddBtn').onclick=openAddModal;}
+  else{document.getElementById('headerAddBtn').textContent='+ 담당자 추가';document.getElementById('headerAddBtn').onclick=()=>openPersonModal();renderPeople();}
+}
+
+// ═══════════════════════════════════════════════
+// RENDER TABLE
+// ═══════════════════════════════════════════════
+function personById(id){return people.find(p=>String(p.id)===String(id));}
+function internalPeople(){return people.filter(p=>p.type==='internal');}
+function clientPeople(){return people.filter(p=>p.type==='client');}
+
+function dateBadge(d){
+  if(!d) return '<span class="date-badge old">—</span>';
+  const diff=(new Date()-new Date(d))/86400000;
+  return `<span class="date-badge ${diff<7?'fresh':diff<30?'recent':'old'}">📅 ${d}</span>`;
+}
+
+function renderPersonStack(ids, dc){
+  if(!ids||!ids.length) return '<span style="color:var(--text3);font-size:11.5px">—</span>';
+  return `<div class="person-stack">${ids.map(id=>{
+    const p=personById(id);if(!p)return '';
+    return `<div><span class="person-pill"><span class="person-dot ${dc}"></span>${p.name}${p.title?' '+p.title:''}</span>${p.email?`<div class="person-email-tiny">✉ ${p.email}</div>`:''}</div>`;
+  }).join('')}</div>`;
+}
+
+function renderTable(){
+  const q=(document.getElementById('searchInput').value||'').toLowerCase();
+  const rF=document.getElementById('filterRegion').value;
+  const pF=document.getElementById('filterPic').value;
+  const sF=document.getElementById('filterStatus').value;
+  const tbody=document.getElementById('tableBody');
+  let fl=records.filter(r=>{
+    const iN=(r.internalPersonIds||[]).map(id=>personById(id)?.name||'').join(' ').toLowerCase();
+    const cN=(r.clientPersonIds||[]).map(id=>personById(id)?.name||'').join(' ').toLowerCase();
+    return(!q||r.company.toLowerCase().includes(q)||iN.includes(q)||cN.includes(q)||(r.biz||[]).join(' ').toLowerCase().includes(q)||(r.memo||'').toLowerCase().includes(q))
+      &&(!rF||(r.regions||[]).includes(rF))
+      &&(!pF||(r.internalPersonIds||[]).some(id=>personById(id)?.name===pF))
+      &&(!sF||r.status===sF);
+  });
+  if(!fl.length){tbody.innerHTML=`<tr class="empty-row"><td colspan="8">데이터가 없습니다</td></tr>`;updateStats();return;}
+  tbody.innerHTML=fl.map(r=>{
+    const bH=(r.biz||[]).map(b=>`<span class="tag ${tagColor(b)}">${b}</span>`).join('');
+    const rgH=(r.regions||[]).map(g=>`<span class="tag ${tagColor(g)}">${g}</span>`).join('');
+    const memo=r.memo?`<span class="memo-cell" title="${r.memo}">${r.memo}</span>`:`<span class="memo-cell memo-empty">—</span>`;
+    return `<tr onclick="openDetail(${JSON.stringify(r.id)})">
+      <td><div class="company-cell"><div class="company-avatar" style="background:${getColor(r.company)}">${r.company[0]||'?'}</div><div><div class="company-name">${r.company}</div><div class="company-type">${r.type||''}</div></div></div></td>
+      <td>${renderPersonStack(r.clientPersonIds||[],'pd-c')}</td>
+      <td><div class="tag-list">${bH||'<span style="color:var(--text3)">—</span>'}</div></td>
+      <td><div class="tag-list">${rgH||'<span style="color:var(--text3)">—</span>'}</div></td>
+      <td>${renderPersonStack(r.internalPersonIds||[],'pd-i')}</td>
+      <td>${memo}</td>
+      <td>${dateBadge(r.date)}</td>
+      <td><div class="actions" onclick="event.stopPropagation()">
+        <button class="btn btn-secondary btn-sm" onclick="openEditModal(${JSON.stringify(r.id)})">✏</button>
+        <button class="btn btn-danger" onclick="deleteRecord(${JSON.stringify(r.id)})">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  updateStats();updateFilters();
+}
+
+function updateStats(){
+  document.getElementById('statTotal').textContent=records.length;
+  document.getElementById('statActive').textContent=records.filter(r=>r.status==='active').length;
+  document.getElementById('statRegions').textContent=new Set(records.flatMap(r=>r.regions||[])).size;
+  const m=new Date().toISOString().slice(0,7);
+  document.getElementById('statRecent').textContent=records.filter(r=>r.date?.startsWith(m)).length;
+}
+function updateFilters(){
+  const names=[...new Set(records.flatMap(r=>(r.internalPersonIds||[]).map(id=>personById(id)?.name).filter(Boolean)))];
+  const sel=document.getElementById('filterPic');const cur=sel.value;
+  sel.innerHTML='<option value="">전체 담당자</option>';
+  names.forEach(n=>sel.innerHTML+=`<option ${n===cur?'selected':''}>${n}</option>`);
+}
+
+// ═══════════════════════════════════════════════
+// PEOPLE PAGE
+// ═══════════════════════════════════════════════
+function renderPeople(){
+  const q=(document.getElementById('peopleSearch').value||'').toLowerCase();
+  const tF=document.getElementById('peopleTypeFilter').value;
+  const grid=document.getElementById('peopleGrid');
+  const fl=people.filter(p=>(!q||p.name.toLowerCase().includes(q)||(p.email||'').toLowerCase().includes(q))&&(!tF||p.type===tF));
+  if(!fl.length){grid.innerHTML='<div style="color:var(--text3);padding:40px;grid-column:1/-1;text-align:center">등록된 담당자가 없습니다</div>';return;}
+  grid.innerHTML=fl.map(p=>{
+    const linked=records.filter(r=>(r.clientPersonIds||[]).includes(String(p.id))||(r.internalPersonIds||[]).includes(String(p.id)));
+    return `<div class="people-card">
+      <div class="people-card-top">
+        <div class="people-avatar" style="background:${getColor(p.name)}">${p.name[0]||'?'}</div>
+        <div style="flex:1"><div class="people-name">${p.name}</div>
+        <div class="people-title-text">${p.title||'직책 없음'}${p.phone?' · '+p.phone:''}</div>
+        <span class="pt-badge ${p.type==='internal'?'pt-i':'pt-c'}">${p.type==='internal'?'우리회사':'고객사'}</span></div>
+      </div>
+      ${p.email?`<a href="mailto:${p.email}" class="email-link">✉ ${p.email}</a>`:'<div style="color:var(--text3);font-size:11.5px">이메일 없음</div>'}
+      ${p.note?`<div style="font-size:11.5px;color:var(--text3)">${p.note}</div>`:''}
+      ${linked.length?`<div style="font-size:11px;color:var(--text3)">🏢 ${linked.map(r=>r.company).join(', ')}</div>`:''}
+      <div style="display:flex;gap:6px;margin-top:2px">
+        <button class="btn btn-secondary btn-sm" onclick="openPersonModal(null,${JSON.stringify(String(p.id))})">✏ 수정</button>
+        <button class="btn btn-danger" onclick="deletePerson(${JSON.stringify(String(p.id))})">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// COMPANY MODAL
+// ═══════════════════════════════════════════════
+function openAddModal(){editingId=null;document.getElementById('modalTitle').textContent='기업 추가';clearCompanyForm();document.getElementById('fDate').value=new Date().toISOString().slice(0,10);refreshPersonSelects();document.getElementById('modal').classList.add('show');}
+function openEditModal(id){
+  const r=records.find(x=>String(x.id)===String(id));if(!r)return;
+  editingId=r.id;document.getElementById('modalTitle').textContent='기업 수정';
+  document.getElementById('fCompany').value=r.company;document.getElementById('fType').value=r.type||'대기업';
+  document.getElementById('fMemo').value=r.memo||'';document.getElementById('fNote').value=r.note||'';
+  document.getElementById('fDate').value=r.date||'';document.getElementById('fStatus').value=r.status||'active';
+  formClientIds=[...(r.clientPersonIds||[])];formInternalIds=[...(r.internalPersonIds||[])];
+  bizTags=[...(r.biz||[])];regionTags=[...(r.regions||[])];
+  renderTagInputs();refreshPersonSelects();renderFormPersonList('client');renderFormPersonList('internal');
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+function clearCompanyForm(){
+  ['fCompany','fMemo','fNote','fDate'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fType').value='대기업';document.getElementById('fStatus').value='active';
+  bizTags=[];regionTags=[];formClientIds=[];formInternalIds=[];
+  renderTagInputs();renderFormPersonList('client');renderFormPersonList('internal');
+}
+function refreshPersonSelects(){
+  const cS=document.getElementById('fClientPersonSelect'),iS=document.getElementById('fInternalPersonSelect');
+  cS.innerHTML='<option value="">— 담당자 선택 —</option>';iS.innerHTML='<option value="">— 담당자 선택 —</option>';
+  clientPeople().forEach(p=>cS.innerHTML+=`<option value="${p.id}">${p.name} ${p.title||''} · ${p.email||'이메일없음'}</option>`);
+  internalPeople().forEach(p=>iS.innerHTML+=`<option value="${p.id}">${p.name} ${p.title||''} · ${p.email||'이메일없음'}</option>`);
+}
+function addPersonToRecord(type){
+  const sel=document.getElementById(type==='client'?'fClientPersonSelect':'fInternalPersonSelect');
+  const id=sel.value;if(!id)return;
+  if(type==='client'&&!formClientIds.includes(id))formClientIds.push(id);
+  if(type==='internal'&&!formInternalIds.includes(id))formInternalIds.push(id);
+  sel.value='';renderFormPersonList(type);
+}
+function removePersonFromRecord(type,id){
+  if(type==='client')formClientIds=formClientIds.filter(x=>x!==id);else formInternalIds=formInternalIds.filter(x=>x!==id);
+  renderFormPersonList(type);
+}
+function renderFormPersonList(type){
+  const ids=type==='client'?formClientIds:formInternalIds;
+  const container=document.getElementById(type==='client'?'clientPersonList':'internalPersonList');
+  if(!ids.length){container.innerHTML='';return;}
+  container.innerHTML=ids.map(id=>{const p=personById(id);if(!p)return '';return `<div class="person-item"><div style="width:26px;height:26px;border-radius:6px;background:${getColor(p.name)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">${p.name[0]}</div><div class="person-item-info"><div class="person-item-name">${p.name} <span style="color:var(--text3);font-weight:400">${p.title||''}</span></div><div class="person-item-email">${p.email||'이메일 없음'}</div></div><button class="btn btn-danger btn-sm" onclick="removePersonFromRecord('${type}','${id}')">✕</button></div>`;}).join('');
+}
+
+function handleTagInput(e,type){
+  const v=e.target.value.trim();
+  if((e.key==='Enter'||e.key===',')&&v){e.preventDefault();v.split(',').map(t=>t.trim()).filter(Boolean).forEach(t=>{if(type==='biz')bizTags.push(t);else regionTags.push(t);});e.target.value='';renderTagInputs();}
+  else if(e.key==='Backspace'&&!v){if(type==='biz'&&bizTags.length)bizTags.pop();else if(type==='region'&&regionTags.length)regionTags.pop();renderTagInputs();}
+}
+function removeTag(type,idx){if(type==='biz')bizTags.splice(idx,1);else regionTags.splice(idx,1);renderTagInputs();}
+function renderTagInputs(){
+  ['biz','region'].forEach(type=>{
+    const wid=type==='biz'?'bizTagWrap':'regionTagWrap',iid=type==='biz'?'bizTagInput':'regionTagInput',tags=type==='biz'?bizTags:regionTags;
+    const wrap=document.getElementById(wid),inp=document.getElementById(iid);
+    wrap.querySelectorAll('.ti-tag').forEach(e=>e.remove());
+    tags.forEach((t,i)=>{const el=document.createElement('span');el.className='ti-tag';el.innerHTML=`${t}<span class="ti-remove" onclick="removeTag('${type}',${i})">✕</span>`;wrap.insertBefore(el,inp);});
+  });
+}
+
+// ═══════════════════════════════════════════════
+// SAVE / DELETE RECORD
+// ═══════════════════════════════════════════════
+async function saveRecord(){
+  const company=document.getElementById('fCompany').value.trim();
+  if(!company){showToast('error','오류','기업명을 입력하세요');return;}
+  const btn=document.getElementById('saveBtn');btn.disabled=true;btn.textContent='저장 중...';
+  const nd={
+    Title:company,
+    CompanyType:document.getElementById('fType').value,
+    ClientPersonIds:formClientIds.join('|'),
+    InternalPersonIds:formInternalIds.join('|'),
+    BizAreas:bizTags.join('|'),
+    Regions:regionTags.join('|'),
+    Memo:document.getElementById('fMemo').value.trim(),
+    NoteDetail:document.getElementById('fNote').value.trim(),
+    UpdateDate:document.getElementById('fDate').value,
+    Status:document.getElementById('fStatus').value
+  };
+  try{
+    setSync('saving');
+    let isUpdate=false;
+    if(editingId!==null){
+      isUpdate=true;
+      const old=records.find(r=>String(r.id)===String(editingId));
+      const changes=[];
+      if(old.memo!==nd.Memo)changes.push(`메모: ${nd.Memo}`);
+      if(old.note!==nd.NoteDetail)changes.push('업데이트 내용 변경');
+      if(JSON.stringify(old.biz)!==JSON.stringify(bizTags))changes.push(`관심 사업: ${bizTags.join(', ')}`);
+      if(JSON.stringify(old.regions)!==JSON.stringify(regionTags))changes.push(`관심 지역: ${regionTags.join(', ')}`);
+      await apiPost({action:'update',sheet:'Companies',id:editingId,data:nd,changes});
+      const idx=records.findIndex(r=>String(r.id)===String(editingId));
+      records[idx]={...records[idx],company,type:nd.CompanyType,clientPersonIds:formClientIds,internalPersonIds:formInternalIds,biz:bizTags,regions:regionTags,memo:nd.Memo,note:nd.NoteDetail,date:nd.UpdateDate,status:nd.Status};
+    }else{
+      const res=await apiPost({action:'create',sheet:'Companies',data:nd});
+      records.unshift({id:res.id,company,type:nd.CompanyType,clientPersonIds:formClientIds,internalPersonIds:formInternalIds,biz:bizTags,regions:regionTags,memo:nd.Memo,note:nd.NoteDetail,date:nd.UpdateDate,status:nd.Status});
+    }
+    setSync('ok');closeModal();renderTable();
+    showToast('success',isUpdate?'✅ 업데이트 완료':'✅ 기업 추가',company+' 저장되었습니다');
+    if(isUpdate) showToast('success','📱 텔레그램 알림','담당자에게 업데이트 알림이 전송되었습니다');
+  }catch(e){setSync('err');showToast('error','⚠ 저장 실패',e.message);}
+  finally{btn.disabled=false;btn.textContent='💾 저장';}
+}
+
+async function deleteRecord(id){
+  if(!confirm('이 기업 정보를 삭제하시겠습니까?'))return;
+  try{
+    setSync('saving');
+    await apiPost({action:'delete',sheet:'Companies',id});
+    records=records.filter(r=>String(r.id)!==String(id));
+    setSync('ok');renderTable();
+    showToast('success','🗑 삭제 완료','기업 정보가 삭제되었습니다');
+  }catch(e){setSync('err');showToast('error','⚠ 삭제 실패',e.message);}
+}
+
+// ═══════════════════════════════════════════════
+// PERSON MODAL
+// ═══════════════════════════════════════════════
+function openPersonModal(typeHint,editId){
+  editingPersonId=editId||null;personModalCallback=typeHint||null;
+  document.getElementById('personModalTitle').textContent=editId?'담당자 수정':'담당자 추가';
+  if(editId){const p=personById(editId);if(p){document.getElementById('pName').value=p.name||'';document.getElementById('pTitle').value=p.title||'';document.getElementById('pEmail').value=p.email||'';document.getElementById('pType').value=p.type||'internal';document.getElementById('pPhone').value=p.phone||'';document.getElementById('pNote').value=p.note||'';}}
+  else{['pName','pTitle','pEmail','pPhone','pNote'].forEach(id=>document.getElementById(id).value='');document.getElementById('pType').value=typeHint==='client'?'client':'internal';}
+  document.getElementById('personModal').classList.add('show');
+}
+function closePersonModal(){document.getElementById('personModal').classList.remove('show');}
+
+async function savePerson(){
+  const name=document.getElementById('pName').value.trim();
+  if(!name){showToast('error','오류','이름을 입력하세요');return;}
+  const btn=document.getElementById('personSaveBtn');btn.disabled=true;btn.textContent='저장 중...';
+  const pd={Name:name,PersonTitle:document.getElementById('pTitle').value.trim(),Email:document.getElementById('pEmail').value.trim(),PersonType:document.getElementById('pType').value,Phone:document.getElementById('pPhone').value.trim(),PersonNote:document.getElementById('pNote').value.trim()};
+  try{
+    setSync('saving');
+    if(editingPersonId){
+      await apiPost({action:'update',sheet:'People',id:editingPersonId,data:pd});
+      const idx=people.findIndex(p=>String(p.id)===String(editingPersonId));
+      people[idx]={...people[idx],name,title:pd.PersonTitle,email:pd.Email,type:pd.PersonType,phone:pd.Phone,note:pd.PersonNote};
+    }else{
+      const res=await apiPost({action:'create',sheet:'People',data:pd});
+      const np={id:res.id,name,title:pd.PersonTitle,email:pd.Email,type:pd.PersonType,phone:pd.Phone,note:pd.PersonNote};
+      people.push(np);
+      if(personModalCallback==='client')formClientIds.push(res.id);
+      if(personModalCallback==='internal')formInternalIds.push(res.id);
+    }
+    setSync('ok');closePersonModal();refreshPersonSelects();
+    if(personModalCallback)renderFormPersonList(personModalCallback);
+    if(document.getElementById('page-people').classList.contains('active'))renderPeople();
+    showToast('success','✅ 담당자 저장',name+' 등록되었습니다');
+  }catch(e){setSync('err');showToast('error','⚠ 저장 실패',e.message);}
+  finally{btn.disabled=false;btn.textContent='저장';}
+}
+
+async function deletePerson(id){
+  if(!confirm('담당자를 삭제하시겠습니까?'))return;
+  try{
+    await apiPost({action:'delete',sheet:'People',id});
+    people=people.filter(p=>String(p.id)!==String(id));
+    records=records.map(r=>({...r,clientPersonIds:(r.clientPersonIds||[]).filter(x=>x!==id),internalPersonIds:(r.internalPersonIds||[]).filter(x=>x!==id)}));
+    renderPeople();renderTable();
+    showToast('success','🗑 삭제','담당자 삭제되었습니다');
+  }catch(e){showToast('error','⚠ 삭제 실패',e.message);}
+}
+
+// ═══════════════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════════════
+function openDetail(id){
+  const r=records.find(x=>String(x.id)===String(id));if(!r)return;
+  const panel=document.getElementById('detailPanel');
+  const sLabel={active:'🟢 활성',watching:'🟡 관망',inactive:'⚫ 비활성'}[r.status]||'';
+  function pRows(ids){
+    if(!ids||!ids.length)return '<div style="color:var(--text3);font-size:12px">담당자 없음</div>';
+    return ids.map(pid=>{const p=personById(pid);if(!p)return '';return `<div class="detail-person-row"><div style="width:28px;height:28px;border-radius:7px;background:${getColor(p.name)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">${p.name[0]}</div><div class="detail-person-info"><div class="detail-person-name">${p.name} ${p.title||''}</div><div class="detail-person-email">${p.email||'이메일 없음'}</div></div>${p.email?`<a href="mailto:${p.email}" class="email-btn">✉</a>`:''}</div>`;}).join('');
+  }
+  panel.innerHTML=`
+    <div class="detail-header">
+      <div style="display:flex;align-items:center;gap:11px;margin-bottom:8px">
+        <div class="detail-avatar" style="background:${getColor(r.company)}">${r.company[0]||'?'}</div>
+        <div><div style="font-size:16px;font-weight:700">${r.company}</div><div style="font-size:11.5px;color:var(--text3);font-family:var(--mono)">${r.type||''} · ${sLabel}</div></div>
+      </div>
+      ${r.memo?`<div style="font-size:12px;color:var(--text2);padding:7px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border2);margin-top:4px">📌 ${r.memo}</div>`:''}
+    </div>
+    <div class="detail-body">
+      <div class="detail-section"><div class="detail-section-title">고객사 담당자</div>${pRows(r.clientPersonIds||[])}</div>
+      <div class="divider"></div>
+      <div class="detail-section"><div class="detail-section-title">우리회사 담당자</div>${pRows(r.internalPersonIds||[])}</div>
+      <div class="divider"></div>
+      <div class="detail-section"><div class="detail-section-title">M&A 관심 사업</div><div class="tag-list">${(r.biz||[]).map(b=>`<span class="tag ${tagColor(b)}">${b}</span>`).join('')||'—'}</div></div>
+      <div class="divider"></div>
+      <div class="detail-section"><div class="detail-section-title">해외 관심 지역</div><div class="tag-list">${(r.regions||[]).map(g=>`<span class="tag ${tagColor(g)}">${g}</span>`).join('')||'—'}</div></div>
+      <div class="divider"></div>
+      <div class="detail-section"><div class="detail-section-title">업데이트 상세</div><div class="detail-note"><div class="note-date">${r.date||'날짜 없음'}</div>${r.note||'업데이트 내용 없음'}</div></div>
+    </div>
+    <div class="detail-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="openEditModal(${JSON.stringify(r.id)});closeDetail()">✏ 수정</button>
+      <button class="btn btn-secondary" onclick="closeDetail()">닫기</button>
+    </div>`;
+  document.getElementById('detailOverlay').classList.add('show');
+}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('show');}
+
+// ═══════════════════════════════════════════════
+// CSV
+// ═══════════════════════════════════════════════
+function exportCSV(){
+  const h=['기업명','유형','고객사담당자','고객사이메일','우리회사담당자','우리회사이메일','관심사업','관심지역','메모','업데이트일','상태','상세내용'];
+  const rows=records.map(r=>{
+    const c=(r.clientPersonIds||[]).map(id=>personById(id)).filter(Boolean);
+    const i=(r.internalPersonIds||[]).map(id=>personById(id)).filter(Boolean);
+    return[r.company,r.type,c.map(p=>p.name+' '+p.title).join('/'),c.map(p=>p.email||'').join('/'),i.map(p=>p.name+' '+p.title).join('/'),i.map(p=>p.email||'').join('/'),(r.biz||[]).join('/'),(r.regions||[]).join('/'),r.memo,r.date,r.status,(r.note||'').replace(/,/g,'·')];
+  });
+  const csv=[h,...rows].map(r=>r.map(v=>`"${v||''}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));a.download=`kic_crm_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function showToast(type,header,body){
+  const el=document.getElementById('toast');
+  document.getElementById('toastHeader').textContent=header;
+  document.getElementById('toastBody').textContent=body;
+  el.className=`notify-toast ${type} show`;
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),4000);
+}
+
+// START
+loadAll();
+</script>
+</body>
+</html>
